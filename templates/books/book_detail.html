@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Book Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                {% if book.thumbnail_url %}
+                    <img src="{{ book.thumbnail_url }}" class="card-img-top" alt="{{ book.title }}" style="max-height: 400px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                        <i class="bi bi-book text-muted" style="font-size: 5rem;"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="star-rating h5 mb-0">
+                            {% with avg_rating=book.get_average_rating %}
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= avg_rating %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-muted ms-2">({{ avg_rating }}/5)</span>
+                            {% endwith %}
+                        </div>
+                        
+                        {% if user.is_authenticated %}
+                            <button class="btn btn-outline-danger btn-sm" onclick="toggleFavorite({{ book.id }})">
+                                <i class="bi {% if is_favorited %}bi-heart-fill{% else %}bi-heart{% endif %}" id="heart-icon"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted">{{ book.get_review_count }} review{{ book.get_review_count|pluralize }}</p>
+                    
+                    <div class="book-details">
+                        <p><strong>Genre:</strong> {{ book.genre|default:"Not specified" }}</p>
+                        <p><strong>Published:</strong> {{ book.published_date|default:"Unknown" }}</p>
+                        <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Book Details and Reviews -->
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <h1 class="display-6">{{ book.title }}</h1>
+                <p class="lead text-muted">by {{ book.author }}</p>
+                
+                {% if book.description %}
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Description</h6>
+                            <p class="card-text">{{ book.description|linebreaksbr }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Review Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Write a Review</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'submit_review' book.id %}">
+                        {% csrf_token %}
+                        
+                        {% if not user.is_authenticated %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> 
+                                You're posting as a guest. Please provide a nickname and password to manage your review later.
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="nickname" class="form-label">Nickname <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nickname" name="nickname" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <div class="form-text">Use this password to delete your review later</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating <span class="text-danger">*</span></label>
+                            <select class="form-select" id="rating" name="rating" required>
+                                <option value="">Select a rating</option>
+                                <option value="5">★★★★★ (5/5) - Excellent</option>
+                                <option value="4">★★★★☆ (4/5) - Very Good</option>
+                                <option value="3">★★★☆☆ (3/5) - Good</option>
+                                <option value="2">★★☆☆☆ (2/5) - Fair</option>
+                                <option value="1">★☆☆☆☆ (1/5) - Poor</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="review_text" class="form-label">Review <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="review_text" name="review_text" rows="4" 
+                                      placeholder="Share your thoughts about this book..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Submit Review
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Reviews List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-left-dots"></i> 
+                        Reviews ({{ reviews.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                            <div class="review-card card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1">{{ review.get_reviewer_name }}</h6>
+                                            <div class="star-rating text-warning">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= review.rating %}
+                                                        <i class="bi bi-star-fill"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                                            {% if review.updated_at != review.created_at %}
+                                                <br><small class="text-muted fst-italic">Updated: {{ review.updated_at|date:"M d, Y" }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="card-text">{{ review.review_text|linebreaksbr }}</p>
+                                    
+                                    <div class="d-flex gap-2">
+                                        {% if user.is_authenticated and review.user == user %}
+                                            <a href="{% url 'delete_review' review.id %}" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </a>
+                                        {% elif review.is_anonymous %}
+                                            <a href="{% url 'delete_anonymous_review' review.id %}" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-trash"></i> Delete (with password)
+                                            </a>
+                                        {% endif %}
+                                        
+                                        {% if user.is_staff %}
+                                            <a href="{% url 'admin_delete_review' review.id %}" class="btn btn-outline-warning btn-sm">
+                                                <i class="bi bi-shield-exclamation"></i> Admin Delete
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-chat-left text-muted" style="font-size: 3rem;"></i>
+                            <p class="mt-2">No reviews yet. Be the first to review this book!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function toggleFavorite(bookId) {
+    try {
+        const response = await fetch(`/book/${bookId}/toggle-favorite/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        
+        const data = await response.json();
+        const heartIcon = document.getElementById('heart-icon');
+        
+        if (data.is_favorited) {
+            heartIcon.className = 'bi bi-heart-fill';
+        } else {
+            heartIcon.className = 'bi bi-heart';
+        }
+        
+        // Show toast notification
+        showToast(data.message);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Error updating favorite status', 'error');
+    }
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show position-fixed`;
+    toast.style = 'top: 20px; right: 20px; z-index: 1050; max-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="bi bi-chat-left-text text-primary"></i> 
+                    My Reviews
+                </h2>
+                <a href="{% url 'home' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Find More Books
+                </a>
+            </div>
+            
+            {% if reviews %}
+                <div class="row">
+                    {% for review in reviews %}
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            {% if review.book.thumbnail_url %}
+                                                <img src="{{ review.book.thumbnail_url }}" 
+                                                     class="img-fluid rounded" 
+                                                     alt="{{ review.book.title }}"
+                                                     style="max-height: 120px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 120px;">
+                                                    <i class="bi bi-book text-muted" style="font-size: 2rem;"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-9">
+                                            <h5 class="card-title">
+                                                <a href="{% url 'book_detail' review.book.id %}" class="text-decoration-none">
+                                                    {{ review.book.title|truncatechars:40 }}
+                                                </a>
+                                            </h5>
+                                            <p class="text-muted small mb-2">by {{ review.book.author }}</p>
+                                            
+                                            <div class="star-rating text-warning mb-2">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= review.rating %}
+                                                        <i class="bi bi-star-fill"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <span class="text-muted ms-2">({{ review.rating }}/5)</span>
+                                            </div>
+                                            
+                                            <p class="card-text">{{ review.review_text|truncatewords:20 }}</p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar"></i> {{ review.created_at|date:"M d, Y" }}
+                                                    {% if review.updated_at != review.created_at %}
+                                                        <br><i class="bi bi-pencil"></i> Updated {{ review.updated_at|date:"M d, Y" }}
+                                                    {% endif %}
+                                                </small>
+                                                
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'book_detail' review.book.id %}" class="btn btn-outline-primary btn-sm">
+                                                        <i class="bi bi-eye"></i> View Book
+                                                    </a>
+                                                    <a href="{% url 'delete_review' review.id %}" class="btn btn-outline-danger btn-sm">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination if needed -->
+                {% comment %}
+                {% if is_paginated %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">&laquo; First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+                {% endcomment %}
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-chat-left-text text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted mt-3">No reviews yet</h4>
+                    <p class="text-muted">Share your thoughts about the books you've read!</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Browse Books to Review
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if reviews %}
+    <div class="container mb-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h4 class="text-primary">{{ reviews.count }}</h4>
+                                <small class="text-muted">Total Reviews</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="text-success">
+                                    {% with avg_rating=reviews|length %}
+                                        {% if avg_rating > 0 %}
+                                            {% for review in reviews %}
+                                                {% if forloop.first %}
+                                                    {% widthratio reviews|length 1 reviews.count|floatformat:1 %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    {% endwith %}
+                                </h4>
+                                <small class="text-muted">Books Reviewed</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="text-warning">
+                                    {% for review in reviews %}
+                                        {% if forloop.first %}
+                                            {% comment %} Calculate average rating {% endcomment %}
+                                            {% regroup reviews by rating as rating_groups %}
+                                            {% for group in rating_groups %}
+                                                {% if forloop.first %}{{ group.grouper }}{% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </h4>
+                                <small class="text-muted">Avg Rating</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="text-info">
+                                    {{ reviews.first.created_at|date:"M Y" }}
+                                </h4>
+                                <small class="text-muted">Member Since</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

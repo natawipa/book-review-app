@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-shield-exclamation"></i> Admin: Delete Review
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Admin Action:</strong> You are about to delete a review using administrator privileges.
+                    </div>
+                    
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This action cannot be undone and will permanently remove the review.
+                    </div>
+                    
+                    <!-- Review Details -->
+                    <div class="card mb-4 border-warning">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Review Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    {% if review.book.thumbnail_url %}
+                                        <img src="{{ review.book.thumbnail_url }}" 
+                                             class="img-fluid rounded"
+                                             alt="{{ review.book.title }}"
+                                             style="max-height: 120px;">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                             style="height: 120px;">
+                                            <i class="bi bi-book text-muted" style="font-size: 3rem;"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-9">
+                                    <h6 class="card-title">
+                                        <a href="{% url 'book_detail' review.book.id %}" class="text-decoration-none">
+                                            {{ review.book.title }}
+                                        </a>
+                                    </h6>
+                                    <p class="text-muted small">by {{ review.book.author }}</p>
+                                    
+                                    <div class="mb-2">
+                                        <strong>Reviewer:</strong>
+                                        {% if review.user %}
+                                            <span class="badge bg-primary">
+                                                <i class="bi bi-person"></i> {{ review.user.username }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-person-fill"></i> {{ review.nickname }} (Anonymous)
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="star-rating text-warning mb-2">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="bi bi-star-fill"></i>
+                                            {% else %}
+                                                <i class="bi bi-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="text-muted ms-2">({{ review.rating }}/5)</span>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <strong>Posted:</strong> {{ review.created_at|date:"F d, Y g:i A" }}
+                                        {% if review.updated_at != review.created_at %}
+                                            <br><strong>Updated:</strong> {{ review.updated_at|date:"F d, Y g:i A" }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <blockquote class="blockquote">
+                                <p class="mb-0">{{ review.review_text|linebreaksbr }}</p>
+                            </blockquote>
+                        </div>
+                    </div>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="deletion_reason" class="form-label">
+                                <i class="bi bi-chat-left-text"></i> 
+                                Deletion Reason (Optional)
+                            </label>
+                            <textarea class="form-control" 
+                                      id="deletion_reason" 
+                                      name="deletion_reason" 
+                                      rows="3" 
+                                      placeholder="Enter reason for deleting this review (for audit log)..."></textarea>
+                            <div class="form-text">
+                                This reason will be logged for audit purposes.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash"></i> 
+                                Delete Review (Admin)
+                            </button>
+                            <a href="{% url 'admin_reviews' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left"></i> 
+                                Back to Moderation
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer text-muted text-center">
+                    <small>
+                        <i class="bi bi-shield-check"></i>
+                        This action is being performed by administrator: <strong>{{ user.username }}</strong>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header text-center bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-plus"></i> Create Account
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-gift"></i>
+                        <strong>Member Benefits:</strong>
+                        <ul class="mt-2 mb-0">
+                            <li>Save favorite books</li>
+                            <li>Manage your reviews easily</li>
+                            <li>View your review history</li>
+                            <li>No password needed for review management</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">
+                                {{ form.username.label_tag }}
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.help_text %}
+                                <div class="form-text">{{ form.username.help_text }}</div>
+                            {% endif %}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                {{ form.password1.label_tag }}
+                            </label>
+                            {{ form.password1 }}
+                            {% if form.password1.help_text %}
+                                <div class="form-text">{{ form.password1.help_text }}</div>
+                            {% endif %}
+                            {% if form.password1.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password1.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                {{ form.password2.label_tag }}
+                            </label>
+                            {{ form.password2 }}
+                            {% if form.password2.help_text %}
+                                <div class="form-text">{{ form.password2.help_text }}</div>
+                            {% endif %}
+                            {% if form.password2.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password2.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-person-plus"></i> 
+                                Create Account
+                            </button>
+                            <a href="{% url 'login' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-in-right"></i> 
+                                Already have an account? Login
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Guest Option -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <h6 class="card-title">
+                        <i class="bi bi-eye text-primary"></i> 
+                        Just browsing?
+                    </h6>
+                    <p class="card-text text-muted">
+                        You can explore books and post anonymous reviews without creating an account.
+                    </p>
+                    <a href="{% url 'home' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-house"></i> Browse Books
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Style Django form fields */
+#id_username, #id_password1, #id_password2 {
+    @extend .form-control;
+    @extend .form-control-lg;
+}
+
+.form-control-lg {
+    border-radius: 8px;
+}
+
+/* Password strength indicator */
+#id_password1 {
+    position: relative;
+}
+
+.password-strength {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    transition: all 0.3s;
+}
+
+.strength-weak {
+    background: #dc3545;
+    width: 25%;
+}
+
+.strength-medium {
+    background: #ffc107;
+    width: 50%;
+}
+
+.strength-strong {
+    background: #198754;
+    width: 100%;
+}
+</style>
+
+{% block extra_js %}
+<script>
+// Password strength indicator
+document.getElementById('id_password1').addEventListener('input', function(e) {
+    const password = e.target.value;
+    let strength = 0;
+    
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    // Remove existing strength indicator
+    const existing = document.querySelector('.password-strength');
+    if (existing) existing.remove();
+    
+    if (password.length > 0) {
+        const strengthDiv = document.createElement('div');
+        strengthDiv.className = 'password-strength';
+        
+        const strengthBar = document.createElement('div');
+        strengthBar.className = 'password-strength-bar';
+        
+        if (strength < 3) {
+            strengthBar.classList.add('strength-weak');
+        } else if (strength < 5) {
+            strengthBar.classList.add('strength-medium');
+        } else {
+            strengthBar.classList.add('strength-strong');
+        }
+        
+        strengthDiv.appendChild(strengthBar);
+        e.target.parentNode.insertBefore(strengthDiv, e.target.nextSibling);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

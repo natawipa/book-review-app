@@ -1,0 +1,16 @@
+# Core dependencies
+Django==5.2.5
+requests==2.31.0
+
+# Password hashing for anonymous reviews
+bcrypt==4.1.2
+
+# Database (for production)
+# psycopg2-binary==2.9.9  # Uncomment for PostgreSQL
+
+# Development dependencies (optional)
+# django-debug-toolbar==4.2.0  # Uncomment for development debugging
+
+# Security and performance (recommended for production)
+# gunicorn==21.2.0  # Uncomment for production WSGI server
+# whitenoise==6.6.0  # Uncomment for static file serving

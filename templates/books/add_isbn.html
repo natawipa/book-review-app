@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Add Book by ISBN
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>How it works:</strong>
+                        <ol class="mt-2 mb-0">
+                            <li>Enter a valid 10 or 13-digit ISBN</li>
+                            <li>We'll search Google Books for the book details</li>
+                            <li>If found, the book will be added to our database</li>
+                            <li>You can then write reviews for the book</li>
+                        </ol>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="isbn" class="form-label h6">
+                                ISBN <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="isbn" 
+                                   name="isbn" 
+                                   placeholder="Enter ISBN (e.g., 9786165602631)"
+                                   pattern="[0-9\-\s]+"
+                                   title="Please enter a valid ISBN containing only numbers, hyphens, and spaces"
+                                   required>
+                            <div class="form-text">
+                                <i class="bi bi-lightbulb"></i>
+                                ISBN can be found on the back cover or copyright page of the book
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-cloud-download"></i> 
+                                Search & Add Book
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> 
+                                Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-question-circle"></i> 
+                        Need Help Finding ISBN?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>What is ISBN?</h6>
+                            <p class="small text-muted">
+                                ISBN (International Standard Book Number) is a unique identifier for books. 
+                                It can be either 10 or 13 digits long.
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Where to Find It?</h6>
+                            <ul class="small text-muted">
+                                <li>Back cover near the barcode</li>
+                                <li>Copyright page inside the book</li>
+                                <li>Online bookstore listings</li>
+                                <li>Library catalog records</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h6>Examples:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="bg-light p-2 rounded">
+                                    <small><strong>ISBN-13:</strong> 978-6-1656-0263-1</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-2 rounded">
+                                    <small><strong>ISBN-10:</strong> 6-1656-0263-0</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Format ISBN input as user types
+document.getElementById('isbn').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/[^\d]/g, '');
+    
+    // Auto-format based on length
+    if (value.length === 10) {
+        // Format as ISBN-10: X-XXXX-XXXX-X
+        value = value.replace(/(\d)(\d{4})(\d{4})(\d)/, '$1-$2-$3-$4');
+    } else if (value.length === 13) {
+        // Format as ISBN-13: XXX-X-XXXX-XXXX-X
+        value = value.replace(/(\d{3})(\d)(\d{4})(\d{4})(\d)/, '$1-$2-$3-$4-$5');
+    }
+    
+    e.target.value = value;
+});
+
+// Clean ISBN before submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const isbnInput = document.getElementById('isbn');
+    const cleanISBN = isbnInput.value.replace(/[^\d]/g, '');
+    
+    if (cleanISBN.length !== 10 && cleanISBN.length !== 13) {
+        e.preventDefault();
+        alert('Please enter a valid 10 or 13 digit ISBN.');
+        return false;
+    }
+    
+    // Set clean value for submission
+    isbnInput.value = cleanISBN;
+});
+</script>
+{% endblock %}

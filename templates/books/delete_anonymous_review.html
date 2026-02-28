@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-shield-lock"></i> Delete Anonymous Review
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Password Required:</strong> Enter the password you used when posting this review.
+                    </div>
+                    
+                    <!-- Review Details -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                Review for: 
+                                <a href="{% url 'book_detail' review.book.id %}" class="text-decoration-none">
+                                    {{ review.book.title }}
+                                </a>
+                            </h6>
+                            
+                            <div class="star-rating text-warning mb-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-muted ms-2">({{ review.rating }}/5)</span>
+                            </div>
+                            
+                            <blockquote class="blockquote">
+                                <p class="mb-0">{{ review.review_text|linebreaksbr }}</p>
+                                <footer class="blockquote-footer mt-2">
+                                    {{ review.nickname }} 
+                                    <cite title="Review Date">{{ review.created_at|date:"F d, Y" }}</cite>
+                                </footer>
+                            </blockquote>
+                        </div>
+                    </div>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock"></i> Password <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" 
+                                   class="form-control form-control-lg" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Enter your review password"
+                                   required autocomplete="off">
+                            <div class="form-text">
+                                This is the password you entered when you posted the review.
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Warning:</strong> This action cannot be undone. Once deleted, you cannot recover this review.
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash"></i> 
+                                Delete Review
+                            </button>
+                            <a href="{% url 'book_detail' review.book.id %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left"></i> 
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+    <script>
+        // Auto-focus password field if there's an error
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordField = document.getElementById('password');
+            const hasError = {{ messages|length }} > 0;
+            if (hasError && passwordField) {
+                passwordField.focus();
+                passwordField.select();
+            }
+        });
+    </script>
+{% endif %}
+{% endblock %}
