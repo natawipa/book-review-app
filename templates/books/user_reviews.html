@@ -139,17 +139,7 @@
                             </div>
                             <div class="col-md-3">
                                 <h4 class="text-success">
-                                    {% with avg_rating=reviews|length %}
-                                        {% if avg_rating > 0 %}
-                                            {% for review in reviews %}
-                                                {% if forloop.first %}
-                                                    {% widthratio reviews|length 1 reviews.count|floatformat:1 %}
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                    {% endwith %}
+                                    {{ reviews|length }}
                                 </h4>
                                 <small class="text-muted">Books Reviewed</small>
                             </div>
