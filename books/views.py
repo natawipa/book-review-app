@@ -1,9 +1,8 @@
 import requests
 import re
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
@@ -339,57 +338,19 @@ def user_reviews(request):
 # Authentication views
 def register_view(request):
     """
-    User registration
+    Registration is disabled because OAuth is the only login method
     """
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}!')
-            # Auto login after registration
-            user = authenticate(username=form.cleaned_data['username'],
-                              password=form.cleaned_data['password1'])
-            login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    
-    return render(request, 'registration/register.html', {
-        'form': form,
-        'title': 'Register - Read and Rate'
-    })
+    messages.info(request, "Registration with password is disabled. Please continue with Google.")
+    return redirect('/accounts/google/login/')
 
 
 def login_view(request):
     """
-    User login
+    Redirect to Google OAuth login (only login method)
     """
     if request.user.is_authenticated:
         return redirect('home')
-    
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {username}!')
-                return redirect('home')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    else:
-        form = AuthenticationForm()
-    
-    return render(request, 'registration/login.html', {
-        'form': form,
-        'title': 'Login - Read and Rate'
-    })
+    return redirect('/accounts/google/login/')
 
 
 def logout_view(request):
