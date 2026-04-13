@@ -1,30 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ title|default:"DokushoCafe - Japanese Book Reviews" }}{% endblock %}</title>
+    <title>{% block title %}{{ title|default:"Read and Rate - Book Reviews" }}{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Open Sans Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     
     <style>
         :root {
-            --dokusho-primary: #2c5aa0;
-            --dokusho-secondary: #f8f9fa;
-            --dokusho-accent: #ffc107;
+            --brand-primary: #2c5aa0;
+            --brand-secondary: #f8f9fa;
+            --brand-accent: #ffc107;
+            --text-main: #1f2937;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--text-main);
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 22%);
         }
         
         .navbar-brand {
             font-weight: bold;
-            color: var(--dokusho-primary) !important;
+            color: var(--brand-primary) !important;
         }
-        
-        .navbar-brand .jp-text {
-            font-size: 0.8em;
-            color: #6c757d;
+
+        .navbar {
+            box-shadow: 0 2px 12px rgba(44, 90, 160, 0.08);
         }
         
         .book-card {
@@ -42,21 +54,21 @@
         }
         
         .star-rating {
-            color: var(--dokusho-accent);
+            color: var(--brand-accent);
         }
         
         .review-card {
-            border-left: 4px solid var(--dokusho-primary);
+            border-left: 4px solid var(--brand-primary);
         }
         
         footer {
-            background-color: var(--dokusho-primary);
+            background-color: var(--brand-primary);
             color: white;
         }
         
         .btn-primary {
-            background-color: var(--dokusho-primary);
-            border-color: var(--dokusho-primary);
+            background-color: var(--brand-primary);
+            border-color: var(--brand-primary);
         }
         
         .btn-primary:hover {
@@ -67,6 +79,10 @@
         .alert {
             border-radius: 10px;
         }
+
+        .hero-section {
+            background: radial-gradient(circle at 15% 20%, #e7f0ff 0%, #f8fbff 35%, #ffffff 100%);
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -76,8 +92,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
-                DokushoCafe 
-                <span class="jp-text">読書カフェ</span>
+                Read and Rate
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -147,11 +162,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>DokushoCafe <span class="jp-text">読書カフェ</span></h5>
-                    <p class="mb-0">A Japanese book review platform for book lovers.</p>
+                    <h5>Read and Rate</h5>
+                    <p class="mb-0">A book review platform for readers.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">&copy; 2026 DokushoCafe. Built with Django.</p>
+                    <p class="mb-0">&copy; 2026 Read and Rate. Built with Django.</p>
                 </div>
             </div>
         </div>

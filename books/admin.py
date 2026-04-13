@@ -75,6 +75,6 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 # Customize admin site headers
-admin.site.site_header = "DokushoCafe Admin"
-admin.site.site_title = "DokushoCafe Admin Portal"
-admin.site.index_title = "Welcome to DokushoCafe Administration"
+admin.site.site_header = "Read and Rate Admin"
+admin.site.site_title = "Read and Rate Admin Portal"
+admin.site.index_title = "Welcome to Read and Rate Administration"

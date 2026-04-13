@@ -35,7 +35,7 @@ def home(request):
     return render(request, 'books/home.html', {
         'books': books,
         'query': query,
-        'title': 'DokushoCafe - Japanese Book Reviews'
+        'title': 'Read and Rate - Book Reviews'
     })
 
 
@@ -55,7 +55,7 @@ def book_detail(request, book_id):
         'book': book,
         'reviews': reviews,
         'is_favorited': is_favorited,
-        'title': f"{book.title} - DokushoCafe"
+        'title': f"{book.title} - Read and Rate"
     })
 
 
@@ -145,9 +145,9 @@ def add_book_by_isbn(request):
             messages.error(request, "Invalid ISBN format. Please enter a valid 10 or 13 digit ISBN.")
             return render(request, 'books/add_isbn.html')
         
-        # Check if book already exists
-        if Book.objects.filter(isbn=clean_isbn).exists():
-            book = Book.objects.get(isbn=clean_isbn)
+        # Check local database first to avoid unnecessary API calls
+        book = Book.objects.filter(isbn=clean_isbn).first()
+        if book:
             messages.info(request, f"Book '{book.title}' already exists in our database!")
             return redirect('book_detail', book_id=book.id)
         
@@ -167,7 +167,7 @@ def add_book_by_isbn(request):
             return render(request, 'books/add_isbn.html')
     
     return render(request, 'books/add_isbn.html', {
-        'title': 'Add Book by ISBN - DokushoCafe'
+        'title': 'Add Book by ISBN - Read and Rate'
     })
 
 
@@ -255,7 +255,7 @@ def delete_review(request, review_id):
     
     return render(request, 'books/delete_review.html', {
         'review': review,
-        'title': 'Delete Review - DokushoCafe'
+        'title': 'Delete Review - Read and Rate'
     })
 
 
@@ -282,7 +282,7 @@ def delete_anonymous_review(request, review_id):
     
     return render(request, 'books/delete_anonymous_review.html', {
         'review': review,
-        'title': 'Delete Review - DokushoCafe'
+        'title': 'Delete Review - Read and Rate'
     })
 
 
@@ -320,7 +320,7 @@ def user_favorites(request):
     favorites = Favorite.objects.filter(user=request.user).select_related('book')
     return render(request, 'books/user_favorites.html', {
         'favorites': favorites,
-        'title': 'My Favorites - DokushoCafe'
+        'title': 'My Favorites - Read and Rate'
     })
 
 
@@ -332,7 +332,7 @@ def user_reviews(request):
     reviews = Review.objects.filter(user=request.user).select_related('book')
     return render(request, 'books/user_reviews.html', {
         'reviews': reviews,
-        'title': 'My Reviews - DokushoCafe'
+        'title': 'My Reviews - Read and Rate'
     })
 
 
@@ -360,7 +360,7 @@ def register_view(request):
     
     return render(request, 'registration/register.html', {
         'form': form,
-        'title': 'Register - DokushoCafe'
+        'title': 'Register - Read and Rate'
     })
 
 
@@ -388,7 +388,7 @@ def login_view(request):
     
     return render(request, 'registration/login.html', {
         'form': form,
-        'title': 'Login - DokushoCafe'
+        'title': 'Login - Read and Rate'
     })
 
 

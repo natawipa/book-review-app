@@ -1,4 +1,4 @@
-# DokushoCafe (読書カフェ) - Japanese Book Review Platform
+# Read and Rate
 
 A full-stack web application for discovering, reviewing, and sharing Japanese books. Users can search books by title, author, or ISBN, add new books using Google Books API, and post reviews either as authenticated users or anonymously.
 
@@ -40,7 +40,7 @@ A full-stack web application for discovering, reviewing, and sharing Japanese bo
 
 ```bash
 # Navigate to project directory
-cd /Users/natawipa/dokushocafe
+cd /Users/natawipa/readandrate
 
 # Install dependencies (already done if following this guide)
 pip install -r requirements.txt
@@ -105,7 +105,7 @@ Visit [http://localhost:8000/admin](http://localhost:8000/admin) and login with:
 ## Project Structure
 
 ```
-dokushocafe/
+readandrate/
 ├── books/                  # Main Django app
 │   ├── models.py          # Book, Review, Favorite models
 │   ├── views.py           # All application views
@@ -117,7 +117,7 @@ dokushocafe/
 │   ├── books/             # Book-related templates
 │   └── registration/      # Authentication templates
 ├── static/                # Static files (CSS, JS)
-├── dokushocafe/           # Django project settings
+├── readandrate/           # Django project settings
 └── requirements.txt       # Python dependencies
 ```
 
@@ -134,7 +134,7 @@ ALLOWED_HOSTS = ['your-domain.com']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dokushocafe_db',
+        'NAME': 'readandrate_db',
         'USER': 'your_db_user',
         'PASSWORD': 'your_db_password',
         'HOST': 'localhost',
@@ -216,4 +216,4 @@ pip install bcrypt --no-binary :all:
 
 ---
 
-**DokushoCafe** - Happy Reading! 📖✨
+**ReadAndRate** - Happy Reading!
