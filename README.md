@@ -1,219 +1,266 @@
 # Read and Rate
 
-A full-stack web application for discovering, reviewing, and sharing Japanese books. Users can search books by title, author, or ISBN, add new books using Google Books API, and post reviews either as authenticated users or anonymously.
+Read and Rate is a web application that helps people discover books, share opinions, and make better reading decisions through ratings and reviews. The platform supports searchable book listings, detailed book pages, user favorites, and review moderation.
 
-## Features
+## Project Description
 
-### Core Features
+Read and Rate is designed as a student software engineering project to demonstrate full-stack web development, architecture design, database modeling, authentication, and maintainable code organization. The system integrates external book metadata through Google Books API and supports both authenticated users and moderated community content.
 
-- **Book Search**: Search by title, author, or ISBN
-- **Google Books Integration**: Automatically fetch book details for new ISBNs
-- **Review System**: 5-star rating system with text reviews
-- **Dual User System**: Both registered and anonymous users can post reviews
-- **Favorites**: Registered users can save favorite books
-- **Admin Moderation**: Staff can moderate all reviews
+## Problem Statement
 
-### User Roles
+Many readers struggle to decide what to read next because book information is scattered across multiple websites. Existing platforms are often overloaded with ads, hard to navigate, or not focused on simple community-driven reviews. This project solves that problem by providing a focused and easy-to-use review platform with search, ratings, and user contributions.
 
-- **Guest Users**: Search, view books, post anonymous reviews (with password protection)
-- **Registered Users**: All guest features plus review management, favorites, profile
-- **Administrators**: Full content moderation and management
+## Target Users
 
-## Tech Stack
+- General readers who want to discover and evaluate books
+- Students who need quick access to book details and community reviews
+- Book club members who want to share reading feedback
+- Administrators who moderate reviews and maintain platform quality
 
-- **Backend**: Django 5.2.5 (Python)
-- **Frontend**: HTML, CSS, JavaScript, Bootstrap 5
-- **Database**: SQLite (development) / PostgreSQL (production ready)
-- **External API**: Google Books API
-- **Authentication**: Django built-in system
-- **Security**: bcrypt for anonymous review passwords, CSRF protection
+## System Architecture Overview
 
-## Requirements
+The system follows a layered MVC-style architecture in Django:
 
-- Python 3.8+
-- pip (Python package manager)
-- Internet connection (for Google Books API)
+- Presentation layer: Django templates with Bootstrap and custom CSS
+- Application layer: Django views and URL routing for business flow
+- Domain/data layer: Django models for books, reviews, favorites, and users
+- Infrastructure layer: PostgreSQL database, Google Books API, Google OAuth
 
-## Quick Start
+Request flow:
 
-### 1. Clone and Setup Environment
+1. User action in browser triggers a route.
+2. View validates input and applies business rules.
+3. Data is read/written through ORM models.
+4. Template renders result and returns HTML response.
+
+## User Roles and Permissions
+
+### Guest User
+
+- Can browse books and search by title, author, or ISBN
+- Can view book details and existing reviews
+- Can submit anonymous reviews (with controlled deletion flow)
+
+### Authenticated User (Google OAuth)
+
+- Can sign in with Google
+- Can submit reviews linked to personal account
+- Can manage favorites
+- Can view personal reviews and favorites
+
+### Admin User
+
+- Can access Django admin dashboard
+- Can moderate and delete inappropriate reviews
+- Can monitor application content quality
+
+## Technology Stack
+
+### Frontend
+
+- Django Templates
+- Bootstrap 5
+- Bootstrap Icons
+- Open Sans (Google Fonts)
+- Custom CSS
+
+### Backend
+
+- Python 3.13
+- Django 6
+- django-allauth (Google OAuth authentication)
+- requests (HTTP API integration)
+
+### Database
+
+- PostgreSQL (primary)
+- SQLite (fallback in development if DB env vars are absent)
+
+### External APIs and Services
+
+- Google Books API for book metadata lookup by ISBN
+- Google OAuth 2.0 for login
+
+## Code Structure and Repository Organization
+
+The project is organized using a layered Django structure:
+
+1. Configuration layer
+
+- `readandrate/settings.py`: environment loading, app registration, middleware, OAuth, and database configuration
+- `readandrate/urls.py`: root URL routing
+- `readandrate/asgi.py` and `readandrate/wsgi.py`: deployment entry points
+
+2. Application layer
+
+- `books/urls.py`: app-level route mapping
+- `books/views.py`: request handling, validation, business flow, API integration, and page rendering control
+
+3. Domain/data layer
+
+- `books/models.py`: core entities (`Book`, `Review`, `Favorite`) and domain helper methods
+- `books/migrations/`: schema evolution history
+
+4. Presentation layer
+
+- `templates/`: page templates grouped by feature (`books/`, `registration/`)
+- `templates/base.html`: shared layout and navigation
+- `static/css/custom.css`: custom styling
+
+5. Administration layer
+
+- `books/admin.py`: admin model registration, moderation views, and list/search/filter configuration
+
+## Database Design
+
+The system uses PostgreSQL as the primary database (with SQLite fallback for local development when DB environment variables are not set).
+
+### Core tables/entities
+
+1. `Book`
+
+- Fields: `id`, `title`, `author`, `description`, `genre`, `isbn`, `thumbnail_url`, `published_date`, `created_at`
+- Constraint: `isbn` is unique
+
+2. `Review`
+
+- Fields: `id`, `book_id`, `user_id` (nullable), `nickname`, `password_hash`, `rating`, `review_text`, `created_at`, `updated_at`
+- Constraints: `rating` must be between 1 and 5
+- Supports both authenticated and anonymous reviews
+
+3. `Favorite`
+
+- Fields: `id`, `user_id`, `book_id`, `created_at`
+- Constraint: unique pair (`user_id`, `book_id`) to prevent duplicate favorites
+
+### Relationships
+
+- One `Book` has many `Review` records (1:N)
+- One authenticated `User` can create many `Review` records (1:N)
+- `User` and `Book` have a many-to-many relation through `Favorite`
+
+### Data access pattern
+
+- Views use Django ORM queries (`filter`, `create`, `get_or_create`, `select_related`) instead of raw SQL
+- Business rules (review limits, favorite toggling, anonymous password checks) are enforced in the application layer before persistence
+
+## Installation and Setup
+
+### Prerequisites
+
+- Python 3.11+
+- PostgreSQL 14+ (or higher)
+- Google Cloud OAuth client for web application
+
+### Steps
+
+1. Clone the repository.
+2. Create and activate a virtual environment.
+3. Install dependencies:
 
 ```bash
-# Navigate to project directory
-cd /Users/natawipa/readandrate
-
-# Install dependencies (already done if following this guide)
 pip install -r requirements.txt
 ```
 
-### 2. Database Setup
+4. Configure environment variables in `.env`.
+5. Ensure PostgreSQL is running and credentials are valid.
+6. Run migrations:
 
 ```bash
-# Apply migrations (already done if following this guide)
 python manage.py migrate
-
-# Create superuser (already done if following this guide)
-python manage.py createsuperuser
 ```
 
-### 3. Run Development Server
+7. Start server:
 
 ```bash
-# Start the development server
 python manage.py runserver
 ```
 
-Visit [http://localhost:8000](http://localhost:8000) to access the application.
+## How to Run the System
 
-### 4. Admin Access
+- Open `http://localhost:8000/`
+- Use `http://localhost:8000/login/` for Google sign-in
+- Admin panel: `http://localhost:8000/admin/`
 
-Visit [http://localhost:8000/admin](http://localhost:8000/admin) and login with:
+## Example Environment Variables
 
-- Username: `admin`
-- Password: (the password you set during superuser creation)
+```env
+# Google OAuth
+GOOGLE_OAUTH_CLIENT_ID=your_google_client_id
+GOOGLE_OAUTH_CLIENT_SECRET=your_google_client_secret
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+DJANGO_SITE_ID=1
+DJANGO_CANONICAL_HOST=localhost:8000
+DJANGO_CANONICAL_SCHEME=http
 
-## Usage Guide
+# Database
+DATABASE_NAME=readandrate_db
+DATABASE_USER=readandrate_user
+DATABASE_PASSWORD=your_secure_password
+DATABASE_HOST=127.0.0.1
+DATABASE_PORT=5432
 
-### Adding Books
-
-1. **By ISBN**: Click "Add Book" and enter a valid ISBN-10 or ISBN-13
-2. **Manual**: Use Django admin to manually add books
-3. **API Integration**: The system automatically fetches book details from Google Books API
-
-### Writing Reviews
-
-**For Guests (Anonymous)**:
-
-1. Navigate to any book page
-2. Fill in nickname and password (for future deletion)
-3. Select rating and write review
-4. Submit review
-
-**For Registered Users**:
-
-1. Login to your account
-2. Navigate to any book page
-3. Select rating and write review (no password needed)
-4. Submit review
-
-### Managing Reviews
-
-- **Anonymous users**: Use the password you set to delete your reviews
-- **Registered users**: Delete/edit reviews from book pages or user profile
-- **Administrators**: Moderate all reviews via admin panel or staff interface
-
-## Project Structure
-
-```
-readandrate/
-├── books/                  # Main Django app
-│   ├── models.py          # Book, Review, Favorite models
-│   ├── views.py           # All application views
-│   ├── urls.py            # URL routing
-│   ├── admin.py           # Django admin configuration
-│   └── migrations/        # Database migrations
-├── templates/             # HTML templates
-│   ├── base.html          # Base template with Bootstrap
-│   ├── books/             # Book-related templates
-│   └── registration/      # Authentication templates
-├── static/                # Static files (CSS, JS)
-├── readandrate/           # Django project settings
-└── requirements.txt       # Python dependencies
+# Django
+DJANGO_SECRET_KEY=your_secret_key
+DJANGO_DEBUG=True
 ```
 
-## Configuration
+## Screenshots and Demo Videos
 
-### Environment Variables (Production)
+### Discover Books
 
-```python
-# In settings.py for production
-DEBUG = False
-ALLOWED_HOSTS = ['your-domain.com']
+Search for books by title, author, or ISBN with fast and intuitive results.
 
-# Database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'readandrate_db',
-        'USER': 'your_db_user',
-        'PASSWORD': 'your_db_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
-### Google Books API
-
-The application uses Google Books API without authentication for basic book lookups. For production with high usage, consider:
-
-1. Getting a Google Books API key
-2. Adding rate limiting
-3. Implementing caching for API responses
-
-## Troubleshooting
-
-### Common Issues
-
-**1. Migration Errors**
-
-```bash
-# Reset migrations if needed
-python manage.py migrate books zero
-python manage.py makemigrations books
-python manage.py migrate
-```
-
-**2. Static Files Not Loading**
-
-```bash
-# Collect static files for production
-python manage.py collectstatic
-```
-
-**3. Google Books API Issues**
-
-- Check internet connection
-- Verify ISBN format (10 or 13 digits)
-- Some books may not be available in Google Books
-
-**4. bcrypt Installation Issues**
-
-```bash
-# On some systems, you might need
-pip install bcrypt --no-binary :all:
-```
-
-## Security Features
-
-- **CSRF Protection**: Enabled for all forms
-- **Password Hashing**: bcrypt for anonymous review passwords
-- **Input Validation**: Server-side validation for all inputs
-- **SQL Injection Protection**: Django ORM prevents raw SQL vulnerabilities
-- **XSS Protection**: Template auto-escaping enabled
-
-## API Endpoints
-
-### Book Operations
-
-- `GET /`: Homepage with search
-- `GET /book/<id>/`: Book detail page
-- `POST /book/<id>/review/`: Submit review
-- `POST /add-isbn/`: Add book by ISBN
-
-### User Operations
-
-- `POST /register/`: User registration
-- `POST /login/`: User login
-- `POST /logout/`: User logout
-- `GET /my-reviews/`: User's reviews
-- `GET /my-favorites/`: User's favorites
-
-### Ajax Endpoints
-
-- `GET /search/`: Book search API
-- `POST /book/<id>/toggle-favorite/`: Toggle favorite status
+![Search Book](screenshots/search-book.gif)
 
 ---
 
-**ReadAndRate** - Happy Reading!
+### Add Books
+
+Easily add new books using ISBN with automatic data from Google Books API.
+
+![Add Book](screenshots/add-book.gif)
+
+---
+
+### Authentication
+
+Sign in securely using Google OAuth for a personalized experience.
+
+![Login](screenshots/login.gif)
+
+---
+
+### Share Your Thoughts
+
+Authenticated users can write and manage their own reviews.
+
+![Review Auth](screenshots/review-book-auth.gif)
+
+---
+
+### Open Community Reviews
+
+Guests can also contribute reviews with a controlled moderation system.
+
+![Review Guest](screenshots/review-book-guest.gif)
+
+---
+
+## Extra Features
+
+### Save Your Favorites
+
+Keep track of books you love in your personal favorites list.
+
+![Favorites Page](screenshots/favorites-page.png)
+
+---
+
+## System Insight
+
+### Code Structure Visualization
+
+Understand the internal architecture and complexity of the system.
+
+![CodeCharta Visualization](screenshots/code-charta.png)
